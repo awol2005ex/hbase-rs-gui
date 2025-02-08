@@ -15,7 +15,7 @@ export const getHbaseConfigList = async () => {
 
 //保证HDFS连接配置
 export const saveHbaseConfig = async (hbase_config: HbaseConfig) => {
-  await invoke("save_hbase_config", { hdfsConfig: hbase_config });
+  await invoke("save_hbase_config", { hbaseConfig: hbase_config });
 };
 
 //获取HDFS连接配置列表

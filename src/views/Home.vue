@@ -118,7 +118,7 @@ const addHbaseConfig = async () => {
       id: 0,
       name: "",
       hbase_config: "{}",
-      hbase_env: "",
+      hbase_env: "{}",
       del_flag: 0,
     });
   }

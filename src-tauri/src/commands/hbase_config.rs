@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
 use crate::db::db_init::DB_POOL;
-use std::process::Command;
 //hbase配置
 #[derive(Debug, Default, Deserialize, Serialize, sqlx::FromRow, Clone)]
 pub struct HbaseConfig {

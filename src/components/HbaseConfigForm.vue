@@ -27,7 +27,6 @@
 <script setup lang="ts">
 import { Reactive, reactive, defineExpose } from "vue";
 import { HbaseConfig } from "../api/hbase_config.ts";
-
 const hbaseConfigForm :Reactive<HbaseConfig> = reactive({ 
   id: 0,  
   name: '',

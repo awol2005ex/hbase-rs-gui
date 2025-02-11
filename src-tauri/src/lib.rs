@@ -1,4 +1,4 @@
-use commands::{hbase_config::*};
+use commands::{hbase_config::*,hbase_api::*};
 
 mod commands;
 mod db;
@@ -18,6 +18,8 @@ pub fn run() {
             delete_hbase_config,
             //获取hbase配置
             get_hbase_config,
+            //获取hbase命名空间列表
+            get_hbase_namespace_list_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

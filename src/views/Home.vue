@@ -82,9 +82,10 @@ import {
   saveHbaseConfig,
   getHbaseConfig,
   deleteHbaseConfig,
-  initConnection,
 } from "../api/hbase_config.ts";
 import HbaseConfigForm from "../components/HbaseConfigForm.vue";
+
+
 import {
   DocumentAdd,
   EditPen,
@@ -176,8 +177,10 @@ const removeHbaseConfig = (id: number) => {
 const connectToHbase = async (id: number, name: string) => {
   try {
     getCurrentWindow().setTitle("Hbase Gui-[" + name + "]");
+
+    
     //进入页面
-    //router.push("/HbaseNamespaceListView/" + id );
+    router.push("/HbaseNamespaceListView/" + id );
   } catch (err: any) {
     ElMessage({
       showClose: true,

@@ -31,3 +31,15 @@ export const get_hbase_table_list = async (id :number, namespace :string) => {
   const tableList: Array<HbaseTable>= nameList.map(item=> new HbaseTable(item));
   return tableList;
 };
+
+export const get_hbase_table_data_list = async (id :number, tablename :string ,pageNum :number,pageSize:number) => {
+  const data: Array<Object> = await invoke("get_hbase_table_data_list_command", {id:id,tablename:tablename,pageNum:pageNum,pageSize:pageSize});
+  
+  return data;
+};
+
+export const get_hbase_table_data_count = async (id :number, tablename :string ,pageNum :number,pageSize:number) => {
+  const c :number = await invoke("get_hbase_table_data_count_command", {id:id,tablename:tablename,pageNum:pageNum,pageSize:pageSize});
+  
+  return c;
+};

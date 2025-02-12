@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use j4rs::{ClasspathEntry, Instance, InvocationArg, JavaClass, JavaOpt, Jvm, JvmBuilder};
 
 pub struct HbaseOper {
@@ -136,6 +138,81 @@ impl HbaseOper {
         Ok(tables)
     }
 
+    pub fn get_hbase_table_data_list(&self,tablename :&str,page_num :i32, page_size:i32) -> Result<Vec<HashMap<String,String>>, String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        
+        let data_java_instance = self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "getTableDataList",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(tablename).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(page_num).map_err(|e| e.to_string())?.into_primitive().map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(page_size).map_err(|e| e.to_string())?.into_primitive().map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        let data: Vec<HashMap<String,String>> = self
+            .jvm
+            .to_rust(data_java_instance)
+            .map_err(|e| e.to_string())?;
+        Ok(data)
+    }
+
+    pub fn get_hbase_table_data_count(&self,tablename :&str) -> Result<i64, String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+        let data_java_instance = self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "getTableDataCount",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(tablename).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        let data: i64 = self
+            .jvm
+            .to_rust(data_java_instance)
+            .map_err(|e| e.to_string())?;
+        Ok(data)
+    }
 }
 
 //hbase namespace 列表
@@ -153,3 +230,19 @@ pub async fn get_hbase_table_list_command(id: i64, namespace :&str) -> Result<Ve
     let tables = oper.get_hbase_table_list(namespace)?;
     Ok(tables)
 }
+
+
+#[tauri::command]
+pub async fn get_hbase_table_data_list_command(id: i64, tablename :&str,page_num :i32, page_size:i32) -> Result<Vec<HashMap<String,String>>, String> {
+    let oper = get_hbase_oper(id)?;
+    let data = oper.get_hbase_table_data_list(tablename,page_num,page_size)?;
+    Ok(data)
+}
+
+#[tauri::command]
+pub async fn get_hbase_table_data_count_command(id: i64, tablename :&str) -> Result<i64, String> {
+    let oper = get_hbase_oper(id)?;
+    let data = oper.get_hbase_table_data_count(tablename)?;
+    Ok(data)
+}
+

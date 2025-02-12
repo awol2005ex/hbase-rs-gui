@@ -19,19 +19,28 @@
                   @click="backToLastPage"
                   title="Back To Last Page" /></el-button-group>
             </td>
+
+            <td>
+               {{ route.params.tablename}}
+            </td>
           </tr>
         </table>
       </el-header>
       <el-main>
-        <el-table :data="data" style="width: 100%">
-          <el-table-column prop="name" label="Table" width="300">
-            <template #default="scope">
-              <el-link  :underline="false" @click="goToTableDataListView(scope.row)">{{
-                scope.row.name
-              }}</el-link>
-            </template>
-          </el-table-column>
+        <el-table
+          :data="data"
+          style="width: 100%"
+        >
+          <el-table-column prop="row" label="row" width="200" />
+          <el-table-column
+            v-for="(item, index) in columns"
+            :key="index"
+            :prop="item"
+            :label="item"
+            :width="200"
+          />
         </el-table>
+
       </el-main>
     </el-container>
   </div>
@@ -54,16 +63,15 @@ import {
   Suitcase,
   Download,
 } from "@element-plus/icons-vue";
-import { Namespace, get_hbase_table_list } from "../api/hbase_api.ts";
+
+import { get_hbase_table_data_list,get_hbase_table_data_count } from "../api/hbase_api.ts";
+
 const router = useRouter();
 const route = useRoute();
 
-const data = ref<Namespace[]>([]);
-  get_hbase_table_list(
-  parseInt(route.params.id as string),(route.params.namespace as string)
-).then((res) => {
-  data.value = res;
-});
+const data = ref<Object[]>([]);
+
+
 
 
 const backToHome = () => {
@@ -73,10 +81,28 @@ const backToHome = () => {
 const backToLastPage = () => {
   router.go(-1);
 };
+const columns = ref<string[]>([]);
+const pageSize = ref(10);
+const total = ref(0);
+const currentPage = ref(1);
 
-//跳转到table data列表
-const goToTableDataListView = (row: Namespace) => {
-  router.push("/HbaseNamespaceTableDataListView/"+ (route.params.id as string)+"/"+(route.params.namespace as string)+"/"+ row.name);
+const queryData= async () => {
+  data.value =await get_hbase_table_data_list( parseInt(route.params.id as string),(route.params.tablename as string),currentPage.value, pageSize.value )
+
+  if(data.value.length>0) {
+    columns.value =Object.keys(data["value"][0]).filter((key) => key!='row')
+  }
+}
+const handleCurrentChange = async (val: number) => {
+  currentPage.value = val;
+  await queryData();
 };
+const handleSizeChange = async (val: number) => {
+  pageSize.value = val;
+  await queryData();
+};
+
+queryData().then(()=>{})
+
 </script>
 <style scoped></style>

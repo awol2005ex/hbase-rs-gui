@@ -98,12 +98,58 @@ impl HbaseOper {
             .map_err(|e| e.to_string())?;
         Ok(namespaces)
     }
+
+    pub fn get_hbase_table_list(&self, ns :&str) -> Result<Vec<String>, String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+        let tables_java_instance = self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "getTables",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(ns).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        let tables: Vec<String> = self
+            .jvm
+            .to_rust(tables_java_instance)
+            .map_err(|e| e.to_string())?;
+        Ok(tables)
+    }
+
 }
 
-//获取单个hbase配置
+//hbase namespace 列表
 #[tauri::command]
 pub async fn get_hbase_namespace_list_command(id: i64) -> Result<Vec<String>, String> {
     let oper = get_hbase_oper(id)?;
     let namespaces = oper.get_hbase_namespace_list()?;
     Ok(namespaces)
+}
+
+//hbase 指定namespace下 table 列表
+#[tauri::command]
+pub async fn get_hbase_table_list_command(id: i64, namespace :&str) -> Result<Vec<String>, String> {
+    let oper = get_hbase_oper(id)?;
+    let tables = oper.get_hbase_table_list(namespace)?;
+    Ok(tables)
 }

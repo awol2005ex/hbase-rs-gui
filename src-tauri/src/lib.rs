@@ -20,6 +20,8 @@ pub fn run() {
             get_hbase_config,
             //获取hbase命名空间列表
             get_hbase_namespace_list_command,
+            //获取hbase命名空间下表列表
+            get_hbase_table_list_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

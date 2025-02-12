@@ -24,12 +24,7 @@
       </el-header>
       <el-main>
         <el-table :data="data" style="width: 100%">
-          <el-table-column prop="name" label="Namespace" width="300">
-            <template #default="scope">
-              <el-link  :underline="false" @click="goToTableListView(scope.row)">{{
-                scope.row.name
-              }}</el-link>
-            </template>
+          <el-table-column prop="name" label="Table" width="300">
           </el-table-column>
         </el-table>
       </el-main>
@@ -54,13 +49,13 @@ import {
   Suitcase,
   Download,
 } from "@element-plus/icons-vue";
-import { Namespace, get_hbase_namespace_list } from "../api/hbase_api.ts";
+import { Namespace, get_hbase_table_list } from "../api/hbase_api.ts";
 const router = useRouter();
 const route = useRoute();
 
 const data = ref<Namespace[]>([]);
- get_hbase_namespace_list(
-  parseInt(route.params.id as string)
+  get_hbase_table_list(
+  parseInt(route.params.id as string),(route.params.namespace as string)
 ).then((res) => {
   data.value = res;
 });
@@ -72,10 +67,6 @@ const backToHome = () => {
 //返回历史上一页
 const backToLastPage = () => {
   router.go(-1);
-};
-//跳转到table列表
-const goToTableListView = (row: Namespace) => {
-  router.push("/HbaseNamespaceTableListView/"+ (route.params.id as string)+"/"+ row.name);
 };
 </script>
 <style scoped></style>

@@ -40,23 +40,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Ref, ref, nextTick, watch } from "vue";
+import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElLoading } from "element-plus";
 import {
   Back,
-  Refresh,
-  Folder,
-  Document,
   HomeFilled,
-  Search,
-  Location,
-  Upload,
-  Delete,
-  FolderAdd,
-  DocumentAdd,
-  Suitcase,
-  Download,
 } from "@element-plus/icons-vue";
 import { Namespace, get_hbase_table_list } from "../api/hbase_api.ts";
 const router = useRouter();

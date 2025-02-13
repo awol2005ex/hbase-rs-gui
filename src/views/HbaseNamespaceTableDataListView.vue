@@ -67,23 +67,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { Ref, ref, nextTick, watch } from "vue";
+import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElLoading } from "element-plus";
 import {
   Back,
-  Refresh,
-  Folder,
-  Document,
   HomeFilled,
-  Search,
-  Location,
-  Upload,
-  Delete,
-  FolderAdd,
-  DocumentAdd,
-  Suitcase,
-  Download,
 } from "@element-plus/icons-vue";
 
 import {
@@ -140,14 +129,6 @@ const queryData = async () => {
   loadingInstance1.close();
 };
 
-const handleCurrentChange = async (val: number) => {
-  currentPage.value = val;
-  await queryData();
-};
-const handleSizeChange = async (val: number) => {
-  pageSize.value = val;
-  await queryData();
-};
 
 const NextPage = async () => {
   currentPage.value = currentPage.value + 1;

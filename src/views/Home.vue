@@ -35,7 +35,7 @@
                     type="primary"
                     :icon="Connection"
                     circle
-                    @click="connectToHbase(item.id || 0,item.name||'')"
+                    @click="connectToHbase(item.id || 0, item.name || '')"
                     title="Connect"
                   />
                 </td>
@@ -84,7 +84,6 @@ import {
   deleteHbaseConfig,
 } from "../api/hbase_config.ts";
 import HbaseConfigForm from "../components/HbaseConfigForm.vue";
-
 
 import {
   DocumentAdd,
@@ -178,9 +177,8 @@ const connectToHbase = async (id: number, name: string) => {
   try {
     getCurrentWindow().setTitle("Hbase Gui-[" + name + "]");
 
-    
     //进入页面
-    router.push("/HbaseNamespaceListView/" + id );
+    router.push("/HbaseNamespaceListView/" + id);
   } catch (err: any) {
     ElMessage({
       showClose: true,
@@ -194,7 +192,7 @@ const connectToHbase = async (id: number, name: string) => {
 watch(
   () => route,
   (newRoute, oldRoute) => {
-    console.log('Route changed:', newRoute, oldRoute);
+    console.log("Route changed:", newRoute, oldRoute);
     getCurrentWindow().setTitle("Hbase Gui");
   },
   { deep: true, immediate: true }

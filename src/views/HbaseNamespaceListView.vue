@@ -17,7 +17,8 @@
                   :icon="Back"
                   circle
                   @click="backToLastPage"
-                  title="Back To Last Page" /></el-button-group>
+                  title="Back To Last Page"
+              /></el-button-group>
             </td>
           </tr>
         </table>
@@ -26,9 +27,11 @@
         <el-table :data="data" style="width: 100%">
           <el-table-column prop="name" label="Namespace" width="300">
             <template #default="scope">
-              <el-link  :underline="false" @click="goToTableListView(scope.row)">{{
-                scope.row.name
-              }}</el-link>
+              <el-link
+                :underline="false"
+                @click="goToTableListView(scope.row)"
+                >{{ scope.row.name }}</el-link
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -39,6 +42,7 @@
 <script setup lang="ts">
 import { Ref, ref, nextTick, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { ElMessage, ElLoading } from "element-plus";
 import {
   Back,
   Refresh,
@@ -59,12 +63,21 @@ const router = useRouter();
 const route = useRoute();
 
 const data = ref<Namespace[]>([]);
- get_hbase_namespace_list(
-  parseInt(route.params.id as string)
-).then((res) => {
-  data.value = res;
-});
 
+const loadingInstance1 = ElLoading.service({ fullscreen: true });
+get_hbase_namespace_list(parseInt(route.params.id as string))
+  .then((res) => {
+    data.value = res;
+    loadingInstance1.close();
+  })
+  .catch((error) => {
+    ElMessage({
+      showClose: true,
+      message: error.toString(),
+      type: "error",
+    });
+    loadingInstance1.close();
+  });
 
 const backToHome = () => {
   router.push("/");
@@ -75,7 +88,12 @@ const backToLastPage = () => {
 };
 //跳转到table列表
 const goToTableListView = (row: Namespace) => {
-  router.push("/HbaseNamespaceTableListView/"+ (route.params.id as string)+"/"+ row.name);
+  router.push(
+    "/HbaseNamespaceTableListView/" +
+      (route.params.id as string) +
+      "/" +
+      row.name
+  );
 };
 </script>
 <style scoped></style>

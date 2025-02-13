@@ -17,20 +17,18 @@
                   :icon="Back"
                   circle
                   @click="backToLastPage"
-                  title="Back To Last Page" /></el-button-group>
+                  title="Back To Last Page"
+              /></el-button-group>
             </td>
 
             <td>
-               {{ route.params.tablename}}
+              {{ route.params.tablename }}
             </td>
           </tr>
         </table>
       </el-header>
       <el-main>
-        <el-table
-          :data="data"
-          style="width: 100%"
-        >
+        <el-table :data="data" style="width: 100%">
           <el-table-column prop="row" label="row" width="200" />
           <el-table-column
             v-for="(item, index) in columns"
@@ -40,14 +38,38 @@
             :width="200"
           />
         </el-table>
-
       </el-main>
+      <el-footer>
+        <table>
+          <tr>
+            <td>Current Page {{ currentPage }}</td>
+            <td>
+              <el-button type="primary" @click="NextPage()"
+                >Next Page</el-button
+              >
+            </td>
+            <td>
+              <el-button type="primary" @click="PrevPage()"
+                >Prev Page</el-button
+              >
+            </td>
+            <td>Total:{{ total==-1 ?"?":total }}</td>
+
+            <td>
+              <el-button type="primary" @click="GetTotalCount()"
+                >Get Total Count</el-button
+              >
+            </td>
+          </tr>
+        </table>
+      </el-footer>
     </el-container>
   </div>
 </template>
 <script setup lang="ts">
 import { Ref, ref, nextTick, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { ElMessage, ElLoading } from "element-plus";
 import {
   Back,
   Refresh,
@@ -64,15 +86,15 @@ import {
   Download,
 } from "@element-plus/icons-vue";
 
-import { get_hbase_table_data_list,get_hbase_table_data_count } from "../api/hbase_api.ts";
+import {
+  get_hbase_table_data_list,
+  get_hbase_table_data_count,
+} from "../api/hbase_api.ts";
 
 const router = useRouter();
 const route = useRoute();
 
 const data = ref<Object[]>([]);
-
-
-
 
 const backToHome = () => {
   router.push("/");
@@ -83,16 +105,41 @@ const backToLastPage = () => {
 };
 const columns = ref<string[]>([]);
 const pageSize = ref(10);
-const total = ref(0);
+const total = ref(-1);
 const currentPage = ref(1);
 
-const queryData= async () => {
-  data.value =await get_hbase_table_data_list( parseInt(route.params.id as string),(route.params.tablename as string),currentPage.value, pageSize.value )
-
-  if(data.value.length>0) {
-    columns.value =Object.keys(data["value"][0]).filter((key) => key!='row')
+const queryData = async () => {
+  const loadingInstance1 = ElLoading.service({ fullscreen: true });
+  try {
+    data.value = await get_hbase_table_data_list(
+      parseInt(route.params.id as string),
+      route.params.tablename as string,
+      currentPage.value,
+      pageSize.value
+    );
+  } catch (error: any) {
+    ElMessage({
+      showClose: true,
+      message: error.toString(),
+      type: "error",
+    });
+    loadingInstance1.close();
   }
-}
+  if (data.value.length > 0) {
+    var columnSet: Set<string> = new Set();
+    data.value.forEach((d) => {
+      Object.keys(d)
+        .filter((key) => key != "row")
+        .forEach((key) => {
+          columnSet.add(key.toString());
+        });
+    });
+    columns.value = Array.from(columnSet);
+  }
+
+  loadingInstance1.close();
+};
+
 const handleCurrentChange = async (val: number) => {
   currentPage.value = val;
   await queryData();
@@ -102,7 +149,30 @@ const handleSizeChange = async (val: number) => {
   await queryData();
 };
 
-queryData().then(()=>{})
+const NextPage = async () => {
+  currentPage.value = currentPage.value + 1;
+  await queryData();
+};
+const PrevPage = async () => {
+  currentPage.value = currentPage.value - 1 < 1 ? 1 : currentPage.value - 1;
+  await queryData();
+};
+queryData().then(() => {});
 
+const GetTotalCount = async () => {
+  const loadingInstance1 = ElLoading.service({ fullscreen: true });
+  try {
+    total.value = await get_hbase_table_data_count(
+      parseInt(route.params.id as string),
+      route.params.tablename as string
+    );
+  } catch (error: any) {
+    ElMessage({
+      showClose: true,
+     message: error.toString(),
+    })
+  }
+  loadingInstance1.close();
+}
 </script>
 <style scoped></style>

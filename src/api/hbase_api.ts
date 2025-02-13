@@ -38,8 +38,8 @@ export const get_hbase_table_data_list = async (id :number, tablename :string ,p
   return data;
 };
 
-export const get_hbase_table_data_count = async (id :number, tablename :string ,pageNum :number,pageSize:number) => {
-  const c :number = await invoke("get_hbase_table_data_count_command", {id:id,tablename:tablename,pageNum:pageNum,pageSize:pageSize});
+export const get_hbase_table_data_count = async (id :number, tablename :string ) => {
+  const c :number = await invoke("get_hbase_table_data_count_command", {id:id,tablename:tablename});
   
   return c;
 };

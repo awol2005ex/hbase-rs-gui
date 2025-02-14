@@ -213,6 +213,39 @@ impl HbaseOper {
             .map_err(|e| e.to_string())?;
         Ok(data)
     }
+
+    pub fn create_table(&self,settings :&str) -> Result<(), String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+         self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "createTable",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(settings).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
 }
 
 //hbase namespace 列表
@@ -244,5 +277,12 @@ pub async fn get_hbase_table_data_count_command(id: i64, tablename :&str) -> Res
     let oper = get_hbase_oper(id)?;
     let data = oper.get_hbase_table_data_count(tablename)?;
     Ok(data)
+}
+
+#[tauri::command]
+pub async fn create_table_command(id: i64, settings :&str) -> Result<(), String> {
+    let oper = get_hbase_oper(id)?;
+    oper.create_table(settings)?;
+    Ok(())
 }
 

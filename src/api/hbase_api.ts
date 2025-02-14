@@ -43,3 +43,7 @@ export const get_hbase_table_data_count = async (id :number, tablename :string )
   
   return c;
 };
+
+export const create_table = async (id :number, settings :string ) => {
+  await invoke("create_table_command", {id:id,settings:settings});
+};

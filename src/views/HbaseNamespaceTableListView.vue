@@ -140,7 +140,7 @@ const CreateHbaseTableConfirm = () => {
     parseInt(route.params.id as string),
     createHbaseTableForm.value.settings
   )
-    .then((res) => {
+    .then((_res) => {
       ElMessage({
         showClose: true,
         message: "Create Table Success",

@@ -200,10 +200,12 @@ const DeleteNamespaces = async () => {
     const loadingInstance1 = ElLoading.service({ fullscreen: true });
     try {
       for (let element of multipleSelection.value) {
+        if(element.name){
         await delete_namespace(
           parseInt(route.params.id as string),
           element.name
         );
+        }
       }
     } catch (error: any) {
       ElMessage({

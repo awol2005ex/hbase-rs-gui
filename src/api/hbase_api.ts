@@ -17,18 +17,24 @@ export const get_hbase_namespace_list = async (id :number) => {
 };
 
 
-export class HbaseTable {
+export class HbaseTableStatus {
    
   name?: string; 
 
-  constructor(name :string) { 
+  namespace? :string
+
+  enabled? :boolean
+
+  constructor(name :string,namespace :string ,enabled: boolean) { 
     this.name = name;
+    this.enabled = enabled;
+    this.namespace = namespace;
   }
 }
 //获取hbase namespace下table 列表
 export const get_hbase_table_list = async (id :number, namespace :string) => {
-  const nameList: Array<string> = await invoke("get_hbase_table_list_command", {id:id,namespace:namespace});
-  const tableList: Array<HbaseTable>= nameList.map(item=> new HbaseTable(item));
+  const tableList: Array<HbaseTableStatus> = await invoke("get_hbase_table_list_command", {id:id,namespace:namespace});
+  
   return tableList;
 };
 

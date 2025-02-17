@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use j4rs::{ClasspathEntry, Instance, InvocationArg, JavaClass, JavaOpt, Jvm, JvmBuilder};
+use serde::{Deserialize, Serialize};
 
 pub struct HbaseOper {
     pub jvm: Jvm,
@@ -64,6 +65,14 @@ pub fn get_hbase_oper(id: i64) -> Result<HbaseOper, String> {
     })
 }
 
+
+#[derive(Serialize, Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub struct HbaseTableStatus {
+    name: String,
+    namespace: String,
+    enabled: bool,
+}
 impl HbaseOper {
     pub fn get_hbase_namespace_list(&self) -> Result<Vec<String>, String> {
         let conf_java_map = self
@@ -101,7 +110,8 @@ impl HbaseOper {
         Ok(namespaces)
     }
 
-    pub fn get_hbase_table_list(&self, ns :&str) -> Result<Vec<String>, String> {
+
+    pub fn get_hbase_table_list(&self, ns :&str) -> Result<Vec<HbaseTableStatus>, String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -131,7 +141,7 @@ impl HbaseOper {
                 ],
             )
             .map_err(|e| e.to_string())?;
-        let tables: Vec<String> = self
+        let tables: Vec<HbaseTableStatus> = self
             .jvm
             .to_rust(tables_java_instance)
             .map_err(|e| e.to_string())?;
@@ -325,7 +335,7 @@ pub async fn get_hbase_namespace_list_command(id: i64) -> Result<Vec<String>, St
 
 //hbase 指定namespace下 table 列表
 #[tauri::command]
-pub async fn get_hbase_table_list_command(id: i64, namespace :&str) -> Result<Vec<String>, String> {
+pub async fn get_hbase_table_list_command(id: i64, namespace :&str) -> Result<Vec<HbaseTableStatus>, String> {
     let oper = get_hbase_oper(id)?;
     let tables = oper.get_hbase_table_list(namespace)?;
     Ok(tables)

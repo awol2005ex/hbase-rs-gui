@@ -39,6 +39,7 @@
               >
             </template>
           </el-table-column>
+          <el-table-column prop="enabled" label="Enabled" width="300"></el-table-column>
         </el-table>
       </el-main>
     </el-container>
@@ -81,14 +82,14 @@ import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElLoading } from "element-plus";
 import { Back, HomeFilled, Plus } from "@element-plus/icons-vue";
 import {
-  Namespace,
+  HbaseTableStatus,
   get_hbase_table_list,
   create_table,
 } from "../api/hbase_api.ts";
 const router = useRouter();
 const route = useRoute();
 
-const data = ref<Namespace[]>([]);
+const data = ref<HbaseTableStatus[]>([]);
 
 const refresh = () => {
   const loadingInstance1 = ElLoading.service({ fullscreen: true });
@@ -120,7 +121,7 @@ const backToLastPage = () => {
 };
 
 //跳转到table data列表
-const goToTableDataListView = (row: Namespace) => {
+const goToTableDataListView = (row: HbaseTableStatus) => {
   router.push(
     "/HbaseNamespaceTableDataListView/" +
       (route.params.id as string) +

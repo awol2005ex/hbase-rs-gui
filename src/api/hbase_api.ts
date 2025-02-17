@@ -47,3 +47,9 @@ export const get_hbase_table_data_count = async (id :number, tablename :string )
 export const create_table = async (id :number, settings :string ) => {
   await invoke("create_table_command", {id:id,settings:settings});
 };
+export const create_namespace = async (id :number, namespace :string ) => {
+  await invoke("create_namespace_command", {id:id,namespace:namespace});
+};
+export const delete_namespace = async (id :number, namespace :string ) => {
+  await invoke("delete_namespace_command", {id:id,namespace:namespace});
+};

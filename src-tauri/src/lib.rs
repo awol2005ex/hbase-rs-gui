@@ -28,6 +28,10 @@ pub fn run() {
             get_hbase_table_data_count_command,
             //创建表
             create_table_command,
+            //创建表空间
+            create_namespace_command,
+            //删除表空间
+            delete_namespace_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

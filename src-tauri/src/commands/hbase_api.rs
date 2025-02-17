@@ -246,6 +246,73 @@ impl HbaseOper {
             .map_err(|e| e.to_string())?;
         Ok(())
     }
+
+
+    pub fn create_namespace(&self,namespace :&str) -> Result<(), String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+         self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "createNamespace",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(namespace).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+    pub fn delete_namespace(&self,namespace :&str) -> Result<(), String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+         self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "deleteNamespace",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(namespace).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
 }
 
 //hbase namespace 列表
@@ -283,6 +350,19 @@ pub async fn get_hbase_table_data_count_command(id: i64, tablename :&str) -> Res
 pub async fn create_table_command(id: i64, settings :&str) -> Result<(), String> {
     let oper = get_hbase_oper(id)?;
     oper.create_table(settings)?;
+    Ok(())
+}
+#[tauri::command]
+pub async fn create_namespace_command(id: i64, namespace :&str) -> Result<(), String> {
+    let oper = get_hbase_oper(id)?;
+    oper.create_namespace(namespace)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn delete_namespace_command(id: i64, namespace :&str) -> Result<(), String> {
+    let oper = get_hbase_oper(id)?;
+    oper.delete_namespace(namespace)?;
     Ok(())
 }
 

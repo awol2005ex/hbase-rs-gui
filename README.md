@@ -27,35 +27,6 @@
 
 To clone and run this application, you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
 
-Configure example :
-
-config:
-```json
-{
-	"hbase.rootdir": "hdfs://nameservice1/hbase",
-	"hbase.zookeeper.quorum": "nn3,nn2,nn1",
-	"hbase.zookeeper.property.clientPort": "2181",
-	"hbase.master.kerberos.principal": "hbase/_HOST@XXX.COM",
-	"hadoop.security.authentication": "kerberos",
-	"hadoop.security.authorization": "true",
-	"hbase.security.authentication": "kerberos",
-	"hbase.defaults.for.version.skip": "true",
-	"hbase.regionserver.kerberos.principal": "hbase/_HOST@XXX.COM",
-	"hbase.thrift.kerberos.principal": "hbase/_HOST@XXX.COM",
-	"hbase.thrift.ssl.enabled": "false",
-	"hbase.rpc.protection": "authentication",
-	"hadoop.security.kerberos.keytab": "/tmp/hive@XXX.COM.keytab",
-	"hadoop.security.kerberos.principal": "hive@XXX.COM"
-}
-```
-
-env:
-```json
-{
-   "java.security.krb5.conf":"D:/MIT/krb5.ini",
-   "javax.security.auth.useSubjectCredsOnly":"false"
-}
-```
 
 
 ```bash
@@ -88,9 +59,40 @@ $ zip hbase-rs-gui.zip build/libs/hbase-oper-all.jar ../hbase-rs-gui/src-tauri/t
 ```
 
 
+
+Configure example :
+
+config:
+```json
+{
+	"hbase.rootdir": "hdfs://nameservice1/hbase",
+	"hbase.zookeeper.quorum": "nn3,nn2,nn1",
+	"hbase.zookeeper.property.clientPort": "2181",
+	"hbase.master.kerberos.principal": "hbase/_HOST@XXX.COM",
+	"hadoop.security.authentication": "kerberos",
+	"hadoop.security.authorization": "true",
+	"hbase.security.authentication": "kerberos",
+	"hbase.defaults.for.version.skip": "true",
+	"hbase.regionserver.kerberos.principal": "hbase/_HOST@XXX.COM",
+	"hbase.thrift.kerberos.principal": "hbase/_HOST@XXX.COM",
+	"hbase.thrift.ssl.enabled": "false",
+	"hbase.rpc.protection": "authentication",
+	"hadoop.security.kerberos.keytab": "/tmp/hive@XXX.COM.keytab",
+	"hadoop.security.kerberos.principal": "hive@XXX.COM"
+}
+```
+
+env:
+```json
+{
+   "java.security.krb5.conf":"D:/MIT/krb5.ini",
+   "javax.security.auth.useSubjectCredsOnly":"false"
+}
+```
+
 ## Download
 
-You can [download](https://github.com/awol2005ex/hbase-rs-gui/releases/tag/v0.1.0) the latest installable version of hbase-rs-gui for Windows 
+You can [download](https://github.com/awol2005ex/hbase-rs-gui/releases/tag/v0.1.0) the latest installable version of hbase-rs-gui for Windows  (JDK 17 or higher on PATH ENV Variable)
 
 
 

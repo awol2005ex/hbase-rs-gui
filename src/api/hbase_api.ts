@@ -59,3 +59,13 @@ export const create_namespace = async (id :number, namespace :string ) => {
 export const delete_namespace = async (id :number, namespace :string ) => {
   await invoke("delete_namespace_command", {id:id,namespace:namespace});
 };
+
+export const delete_table = async (id :number, tablename :string ) => {
+  await invoke("delete_table_command", {id:id,tablename:tablename});
+};
+export const enable_table = async (id :number, tablename :string ) => {
+  await invoke("enable_table_command", {id:id,tablename:tablename});
+};
+export const disable_table = async (id :number, tablename :string ) => {
+  await invoke("disable_table_command", {id:id,tablename:tablename});
+};

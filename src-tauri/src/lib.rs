@@ -32,6 +32,12 @@ pub fn run() {
             create_namespace_command,
             //删除表空间
             delete_namespace_command,
+            //删除表
+            delete_table_command,
+            //启用表
+            enable_table_command,
+            //禁用表
+            disable_table_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

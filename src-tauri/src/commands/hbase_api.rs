@@ -291,6 +291,39 @@ impl HbaseOper {
         Ok(())
     }
 
+    pub fn delete_table(&self,tablename :&str) -> Result<(), String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+         self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "deleteTable",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(tablename).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
     pub fn delete_namespace(&self,namespace :&str) -> Result<(), String> {
         let conf_java_map = self
             .jvm
@@ -318,6 +351,74 @@ impl HbaseOper {
                     InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
                     InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
                     InvocationArg::try_from(namespace).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+
+    pub fn enable_table(&self,tablename :&str) -> Result<(), String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+         self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "enableTable",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(tablename).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+
+    pub fn disable_table(&self,tablename :&str) -> Result<(), String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+         self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "disableTable",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(tablename).map_err(|e| e.to_string())?,
                 ],
             )
             .map_err(|e| e.to_string())?;
@@ -375,4 +476,31 @@ pub async fn delete_namespace_command(id: i64, namespace :&str) -> Result<(), St
     oper.delete_namespace(namespace)?;
     Ok(())
 }
+
+#[tauri::command]
+pub async fn delete_table_command(id: i64, tablename :&str) -> Result<(), String> {
+    let oper = get_hbase_oper(id)?;
+    oper.delete_table(tablename)?;
+    Ok(())
+}
+
+
+#[tauri::command]
+pub async fn enable_table_command(id: i64, tablename :&str) -> Result<(), String> {
+    let oper = get_hbase_oper(id)?;
+    oper.enable_table(tablename)?;
+    Ok(())
+}
+
+
+
+
+#[tauri::command]
+pub async fn disable_table_command(id: i64, tablename :&str) -> Result<(), String> {
+    let oper = get_hbase_oper(id)?;
+    oper.disable_table(tablename)?;
+    Ok(())
+}
+
+
 

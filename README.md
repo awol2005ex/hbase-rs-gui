@@ -28,6 +28,7 @@
 To clone and run this application, you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
 
 ```bash
+# git bash
 # Clone this repository
 $ git clone https://github.com/awol2005ex/hbase-rs-gui.git
 
@@ -39,12 +40,26 @@ $ npm install
 
 # Run the app
 $ npm run tauri build
+
+# close the repository for java operation
+
+$ cd ..
+
+$ git clone https://github.com/awol2005ex/hbase-oper.git
+
+$ cd hbase-oper
+
+$ ./gradlew shadowJar
+
+$ cp build/libs/hbase-oper-all.jar ../hbase-rs-gui/src-tauri/target/release/
+
+$ zip hbase-rs-gui.zip build/libs/hbase-oper-all.jar ../hbase-rs-gui/src-tauri/target/release/hbase-rs-gui.exe
 ```
 
 
 ## Download
 
-You can [download](https://github.com/awol2005ex/hbase-rs-gui/releases/tag/v0.2.0) the latest installable version of hbase-rs-gui for Windows 
+You can [download](https://github.com/awol2005ex/hbase-rs-gui/releases/tag/v0.1.0) the latest installable version of hbase-rs-gui for Windows 
 
 
 

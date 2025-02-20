@@ -1528,7 +1528,7 @@ dependencies = [
 
 [[package]]
 name = "hbase-rs-gui"
-version = "0.3.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytes",

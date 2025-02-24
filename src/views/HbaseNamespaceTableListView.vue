@@ -2,7 +2,7 @@
   <div class="common-layout">
     <el-container>
       <el-header>
-        <table width="100%">
+        <table>
           <tr>
             <td>
               <el-button-group style="float: left">
@@ -27,20 +27,30 @@
                   :icon="Delete"
                   circle
                   @click="DeleteTables"
-                  title="Delete Tables"
-              /><el-button
+                  title="Delete Tables" /><el-button
                   type="primary"
                   :icon="Check"
                   circle
                   @click="EnableTables"
-                  title="Enable Tables"
-              /><el-button
+                  title="Enable Tables" /><el-button
                   type="primary"
                   :icon="Close"
                   circle
                   @click="DisableTables"
                   title="Disable Tables"
               /></el-button-group>
+            </td>
+
+            <td>
+              <el-switch
+                style="float: left"
+                v-model="show_table_metrics"
+                inline-prompt
+                size="large"
+                @change="on_show_table_metrics_change"
+                active-text="show table metrics"
+                inactive-text="don't show table metrics"
+              />
             </td>
           </tr>
         </table>
@@ -66,6 +76,26 @@
             label="Enabled"
             width="300"
           ></el-table-column>
+
+          <el-table-column
+            v-if="show_table_metrics"
+            prop="disksize"
+            label="DiskSize"
+            width="300"
+          >
+            <template #default="scope">
+              {{ formatFileSize(scope.row.disksize) }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            v-if="show_table_metrics"
+            prop="memstoresize"
+            label="MemstoreSize"
+            width="300"
+            ><template #default="scope">
+              {{ formatFileSize(scope.row.memstoresize) }}
+            </template></el-table-column
+          >
         </el-table>
       </el-main>
     </el-container>
@@ -121,33 +151,74 @@ import {
   delete_table,
   enable_table,
   disable_table,
+  get_hbase_table_metrics_list,
 } from "../api/hbase_api.ts";
 const router = useRouter();
 const route = useRoute();
 
 const data = ref<HbaseTableStatus[]>([]);
 
+const show_table_metrics = ref(false);
+//显示文件大小
+const formatFileSize = (size: number) => {
+  if (size < 1024) {
+    return size + " MB";
+  } else if (size < 1024 * 1024) {
+    return (size / 1024).toFixed(2) + " GB";
+  } else if (size < 1024 * 1024 * 1024) {
+    return (size / 1024 / 1024).toFixed(2) + " TB";
+  } else if (size < 1024 * 1024 * 1024 * 1024) {
+    return (size / 1024 / 1024 / 1024).toFixed(2) + " PB";
+  } else {
+    return size + " MB";
+  }
+};
+
 const refresh = () => {
   const loadingInstance1 = ElLoading.service({ fullscreen: true });
-  get_hbase_table_list(
-    parseInt(route.params.id as string),
-    route.params.namespace as string
-  )
-    .then((res) => {
-      data.value = res;
-      loadingInstance1.close();
-    })
-    .catch((error) => {
-      ElMessage({
-        showClose: true,
-        message: error.toString(),
-        type: "error",
+
+  if (show_table_metrics.value) {
+    get_hbase_table_metrics_list(
+      parseInt(route.params.id as string),
+      route.params.namespace as string
+    )
+      .then((res) => {
+        data.value = res;
+        loadingInstance1.close();
+      })
+      .catch((error) => {
+        ElMessage({
+          showClose: true,
+          message: error.toString(),
+          type: "error",
+        });
+        loadingInstance1.close();
       });
-      loadingInstance1.close();
-    });
+  } else {
+    get_hbase_table_list(
+      parseInt(route.params.id as string),
+      route.params.namespace as string
+    )
+      .then((res) => {
+        data.value = res;
+        loadingInstance1.close();
+      })
+      .catch((error) => {
+        ElMessage({
+          showClose: true,
+          message: error.toString(),
+          type: "error",
+        });
+        loadingInstance1.close();
+      });
+  }
 };
 
 refresh();
+
+const on_show_table_metrics_change = () => {
+  refresh();
+};
 const backToHome = () => {
   router.push("/");
 };
@@ -307,7 +378,6 @@ const EnableTables = async () => {
   }
 };
 
-
 const DisableTables = async () => {
   if (multipleSelection.value.length == 0) {
     ElMessage({
@@ -339,7 +409,10 @@ const DisableTables = async () => {
     try {
       for (let element of multipleSelection.value) {
         if (element.name) {
-          await disable_table(parseInt(route.params.id as string), element.name);
+          await disable_table(
+            parseInt(route.params.id as string),
+            element.name
+          );
         }
       }
     } catch (error: any) {

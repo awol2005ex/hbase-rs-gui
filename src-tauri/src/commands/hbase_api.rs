@@ -64,7 +64,13 @@ pub fn get_hbase_oper(id: i64) -> Result<HbaseOper, String> {
         hbase_env_map: hbase_env_map,
     })
 }
-
+#[derive(Serialize, Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub struct HbaseNamespaceStatus {
+    name: String,
+    disksize: Option<i64>,
+    memstoresize : Option<i64>,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -72,9 +78,11 @@ pub struct HbaseTableStatus {
     name: String,
     namespace: String,
     enabled: bool,
+    disksize: Option<i64>,
+    memstoresize : Option<i64>,
 }
 impl HbaseOper {
-    pub fn get_hbase_namespace_list(&self) -> Result<Vec<String>, String> {
+    pub fn get_hbase_namespace_list(&self) -> Result<Vec<HbaseNamespaceStatus>, String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -103,7 +111,43 @@ impl HbaseOper {
                 ],
             )
             .map_err(|e| e.to_string())?;
-        let namespaces: Vec<String> = self
+        let namespaces: Vec<HbaseNamespaceStatus> = self
+            .jvm
+            .to_rust(namespaces_java_instance)
+            .map_err(|e| e.to_string())?;
+        Ok(namespaces)
+    }
+
+    pub fn get_hbase_namespace_metrics_list(&self) -> Result<Vec<HbaseNamespaceStatus>, String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+        let namespaces_java_instance = self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "getNamespaceMetricsList",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        let namespaces: Vec<HbaseNamespaceStatus> = self
             .jvm
             .to_rust(namespaces_java_instance)
             .map_err(|e| e.to_string())?;
@@ -134,6 +178,43 @@ impl HbaseOper {
             .invoke(
                 &self.hbase_tool,
                 "getTables",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(ns).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        let tables: Vec<HbaseTableStatus> = self
+            .jvm
+            .to_rust(tables_java_instance)
+            .map_err(|e| e.to_string())?;
+        Ok(tables)
+    }
+
+    pub fn get_hbase_table_metrics_list(&self, ns :&str) -> Result<Vec<HbaseTableStatus>, String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+        let tables_java_instance = self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "getTableMetricsList",
                 &[
                     InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
                     InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
@@ -428,9 +509,15 @@ impl HbaseOper {
 
 //hbase namespace 列表
 #[tauri::command]
-pub async fn get_hbase_namespace_list_command(id: i64) -> Result<Vec<String>, String> {
+pub async fn get_hbase_namespace_list_command(id: i64) -> Result<Vec<HbaseNamespaceStatus>, String> {
     let oper = get_hbase_oper(id)?;
     let namespaces = oper.get_hbase_namespace_list()?;
+    Ok(namespaces)
+}
+#[tauri::command]
+pub async fn get_hbase_namespace_metrics_list_command(id: i64) -> Result<Vec<HbaseNamespaceStatus>, String> {
+    let oper = get_hbase_oper(id)?;
+    let namespaces = oper.get_hbase_namespace_metrics_list()?;
     Ok(namespaces)
 }
 
@@ -441,6 +528,14 @@ pub async fn get_hbase_table_list_command(id: i64, namespace :&str) -> Result<Ve
     let tables = oper.get_hbase_table_list(namespace)?;
     Ok(tables)
 }
+//hbase 指定namespace下 table 列表（增加统计信息）
+#[tauri::command]
+pub async fn get_hbase_table_metrics_list_command(id: i64, namespace :&str) -> Result<Vec<HbaseTableStatus>, String> {
+    let oper = get_hbase_oper(id)?;
+    let tables = oper.get_hbase_table_metrics_list(namespace)?;
+    Ok(tables)
+}
+
 
 
 #[tauri::command]

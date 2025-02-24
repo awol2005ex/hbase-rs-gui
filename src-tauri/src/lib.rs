@@ -20,8 +20,12 @@ pub fn run() {
             get_hbase_config,
             //获取hbase命名空间列表
             get_hbase_namespace_list_command,
+            //获取hbase命名空间列表(增加统计信息)
+            get_hbase_namespace_metrics_list_command,
             //获取hbase命名空间下表列表
             get_hbase_table_list_command,
+            //获取hbase命名空间下表列表(增加统计信息)
+            get_hbase_table_metrics_list_command,
             //分页查询数据
             get_hbase_table_data_list_command,
             //查询总行数

@@ -5,17 +5,24 @@ export class Namespace {
    
     name?: string; 
 
+    disksize? :number
+
+    memstoresize? :number
+
     constructor(name :string) { 
       this.name = name;
     }
   }
 //获取hbase namespace列表
 export const get_hbase_namespace_list = async (id :number) => {
-  const nameList: Array<string> = await invoke("get_hbase_namespace_list_command", {id});
-  const namespaceList: Array<Namespace>= nameList.map(item=> new Namespace(item));
-  return namespaceList;
+  const nameList: Array<Namespace> = await invoke("get_hbase_namespace_list_command", {id});
+  return nameList;
 };
 
+export const get_hbase_namespace_metrics_list = async (id :number) => {
+  const nameList: Array<Namespace> = await invoke("get_hbase_namespace_metrics_list_command", {id});
+  return nameList;
+};
 
 export class HbaseTableStatus {
    
@@ -24,6 +31,10 @@ export class HbaseTableStatus {
   namespace? :string
 
   enabled? :boolean
+
+  disksize? :number
+
+  memstoresize? :number
 
   constructor(name :string,namespace :string ,enabled: boolean) { 
     this.name = name;
@@ -34,6 +45,12 @@ export class HbaseTableStatus {
 //获取hbase namespace下table 列表
 export const get_hbase_table_list = async (id :number, namespace :string) => {
   const tableList: Array<HbaseTableStatus> = await invoke("get_hbase_table_list_command", {id:id,namespace:namespace});
+  
+  return tableList;
+};
+
+export const get_hbase_table_metrics_list = async (id :number, namespace :string) => {
+  const tableList: Array<HbaseTableStatus> = await invoke("get_hbase_table_metrics_list_command", {id:id,namespace:namespace});
   
   return tableList;
 };

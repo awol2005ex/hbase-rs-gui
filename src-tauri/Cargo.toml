@@ -1,6 +1,6 @@
 [package]
 name = "hbase-rs-gui"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Tauri App For Hbase GUI"
 authors = ["awol2005ex@163.com"]
 edition = "2024"

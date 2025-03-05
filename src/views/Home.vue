@@ -127,6 +127,30 @@ const addHbaseConfig = async () => {
 const hbaseConfigForm = ref<InstanceType<typeof HbaseConfigForm>>();
 //保存
 const AddHbaseConfigConfirm = () => {
+  if (!hbaseConfigForm.value) {
+    ElMessage({
+      showClose: true,
+      message: "Please fill in the form",
+      type: "error",
+    });
+    return;
+  }
+  if (!hbaseConfigForm.value?.hbaseConfigForm) {
+    ElMessage({
+      showClose: true,
+      message: "Please fill in the form",
+      type: "error",
+    });
+    return;
+  }
+  if (!hbaseConfigForm.value?.hbaseConfigForm.name || hbaseConfigForm.value?.hbaseConfigForm.name=="") {
+    ElMessage({
+      showClose: true,
+      message: "Please fill 'name' in the form",
+      type: "error",
+    });
+    return;
+  }
   saveHbaseConfig(hbaseConfigForm.value?.hbaseConfigForm || {})
     .then(() => {
       AddHbaseConfigDialogVisible.value = false;

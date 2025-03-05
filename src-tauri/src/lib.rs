@@ -42,6 +42,8 @@ pub fn run() {
             enable_table_command,
             //禁用表
             disable_table_command,
+            //显示表列族列表
+            get_hbase_table_column_family_list_command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

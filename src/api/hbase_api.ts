@@ -86,3 +86,8 @@ export const enable_table = async (id :number, tablename :string ) => {
 export const disable_table = async (id :number, tablename :string ) => {
   await invoke("disable_table_command", {id:id,tablename:tablename});
 };
+
+export const get_hbase_table_column_family_list = async (id :number, tablename :string ) =>  {
+  const data: Array<string> =await invoke("get_hbase_table_column_family_list_command", {id:id,tablename:tablename});
+  return data;
+};

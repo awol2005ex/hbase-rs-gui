@@ -505,6 +505,44 @@ impl HbaseOper {
             .map_err(|e| e.to_string())?;
         Ok(())
     }
+
+
+    pub fn get_hbase_table_column_family_list(&self,tablename :&str) -> Result<Vec<String>, String> {
+        let conf_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_conf_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+        let env_java_map = self
+            .jvm
+            .java_map(
+                JavaClass::String,
+                JavaClass::String,
+                self.hbase_env_map.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+
+        let data_java_instance = self
+            .jvm
+            .invoke(
+                &self.hbase_tool,
+                "getTableColumnFamilies",
+                &[
+                    InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(tablename).map_err(|e| e.to_string())?,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+        let data: Vec<String> = self
+            .jvm
+            .to_rust(data_java_instance)
+            .map_err(|e| e.to_string())?;
+        Ok(data)
+    }
 }
 
 //hbase namespace 列表
@@ -597,5 +635,10 @@ pub async fn disable_table_command(id: i64, tablename :&str) -> Result<(), Strin
     Ok(())
 }
 
-
+#[tauri::command]
+pub async fn get_hbase_table_column_family_list_command(id: i64, tablename :&str) -> Result<Vec<String>, String> {
+    let oper = get_hbase_oper(id)?;
+    let data=oper.get_hbase_table_column_family_list(tablename)?;
+    Ok(data)
+}
 

@@ -24,6 +24,9 @@
             <td>
               {{ route.params.tablename }}
             </td>
+            <td>
+              Column Families: {{ columnFamilies.join(",") }}
+            </td>
           </tr>
         </table>
       </el-header>
@@ -78,6 +81,7 @@ import {
 import {
   get_hbase_table_data_list,
   get_hbase_table_data_count,
+  get_hbase_table_column_family_list,
 } from "../api/hbase_api.ts";
 
 const router = useRouter();
@@ -85,6 +89,12 @@ const route = useRoute();
 
 const data = ref<Object[]>([]);
 
+const columnFamilies = ref<string[]>([]);
+
+get_hbase_table_column_family_list(parseInt(route.params.id as string),
+route.params.tablename as string).then((res) => {
+  columnFamilies.value = res;
+});
 const backToHome = () => {
   router.push("/");
 };

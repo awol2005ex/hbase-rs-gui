@@ -1,5 +1,5 @@
 use once_cell::sync::OnceCell;
-use sqlx::{migrate::MigrateDatabase, Pool, Sqlite};
+use sqlx::{Pool, Sqlite, migrate::MigrateDatabase};
 
 pub static DB_FILE: &str = "sqlite://hbase-rs-gui.db";
 
@@ -19,13 +19,14 @@ pub async fn init_db() -> Result<(), anyhow::Error> {
 
     if DB_POOL.get().is_none() {
         let pool = Pool::<Sqlite>::connect(DB_FILE).await?;
-         DB_POOL.set(pool).map_err(|_| anyhow::anyhow!("set pool fail".to_string()))?;
-         if let Some(init_pool) = DB_POOL.get() {
+        DB_POOL
+            .set(pool)
+            .map_err(|_| anyhow::anyhow!("set pool fail".to_string()))?;
+        if let Some(init_pool) = DB_POOL.get() {
             sqlx::query("CREATE TABLE if not exists hbase_config (id INTEGER PRIMARY KEY   AUTOINCREMENT, name TEXT, hbase_env TEXT,hbase_config TEXT, del_flag INTEGER)")
         .execute(init_pool).await.map_err(|e| anyhow::anyhow!(e.to_string()))?;
         }
     }
-    
-    
+
     Ok(())
 }

@@ -7,8 +7,8 @@ pub struct HbaseConfig {
     pub id: i64,
     pub name: String,
     pub hbase_config: String, //json配置
-    pub hbase_env: String, //json  环境变量配置
-    pub del_flag: i64, //0正常 1删除
+    pub hbase_env: String,    //json  环境变量配置
+    pub del_flag: i64,        //0正常 1删除
 }
 //获取hbase配置列表
 #[tauri::command]
@@ -77,7 +77,6 @@ pub async fn delete_hbase_config(id: i64) -> Result<(), String> {
     }
     Ok(())
 }
-
 
 //获取单个hbase配置
 pub async fn get_one_hbase_config(id: i64) -> Result<HbaseConfig, String> {

@@ -69,7 +69,7 @@ pub fn get_hbase_oper(id: i64) -> Result<HbaseOper, String> {
 pub struct HbaseNamespaceStatus {
     name: String,
     disksize: Option<i64>,
-    memstoresize : Option<i64>,
+    memstoresize: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -79,7 +79,7 @@ pub struct HbaseTableStatus {
     namespace: String,
     enabled: bool,
     disksize: Option<i64>,
-    memstoresize : Option<i64>,
+    memstoresize: Option<i64>,
 }
 impl HbaseOper {
     pub fn get_hbase_namespace_list(&self) -> Result<Vec<HbaseNamespaceStatus>, String> {
@@ -154,8 +154,7 @@ impl HbaseOper {
         Ok(namespaces)
     }
 
-
-    pub fn get_hbase_table_list(&self, ns :&str) -> Result<Vec<HbaseTableStatus>, String> {
+    pub fn get_hbase_table_list(&self, ns: &str) -> Result<Vec<HbaseTableStatus>, String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -192,7 +191,7 @@ impl HbaseOper {
         Ok(tables)
     }
 
-    pub fn get_hbase_table_metrics_list(&self, ns :&str) -> Result<Vec<HbaseTableStatus>, String> {
+    pub fn get_hbase_table_metrics_list(&self, ns: &str) -> Result<Vec<HbaseTableStatus>, String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -229,7 +228,12 @@ impl HbaseOper {
         Ok(tables)
     }
 
-    pub fn get_hbase_table_data_list(&self,tablename :&str,page_num :i32, page_size:i32) -> Result<Vec<HashMap<String,String>>, String> {
+    pub fn get_hbase_table_data_list(
+        &self,
+        tablename: &str,
+        page_num: i32,
+        page_size: i32,
+    ) -> Result<Vec<HashMap<String, String>>, String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -246,7 +250,7 @@ impl HbaseOper {
                 self.hbase_env_map.clone(),
             )
             .map_err(|e| e.to_string())?;
-        
+
         let data_java_instance = self
             .jvm
             .invoke(
@@ -256,19 +260,25 @@ impl HbaseOper {
                     InvocationArg::try_from(conf_java_map).map_err(|e| e.to_string())?,
                     InvocationArg::try_from(env_java_map).map_err(|e| e.to_string())?,
                     InvocationArg::try_from(tablename).map_err(|e| e.to_string())?,
-                    InvocationArg::try_from(page_num).map_err(|e| e.to_string())?.into_primitive().map_err(|e| e.to_string())?,
-                    InvocationArg::try_from(page_size).map_err(|e| e.to_string())?.into_primitive().map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(page_num)
+                        .map_err(|e| e.to_string())?
+                        .into_primitive()
+                        .map_err(|e| e.to_string())?,
+                    InvocationArg::try_from(page_size)
+                        .map_err(|e| e.to_string())?
+                        .into_primitive()
+                        .map_err(|e| e.to_string())?,
                 ],
             )
             .map_err(|e| e.to_string())?;
-        let data: Vec<HashMap<String,String>> = self
+        let data: Vec<HashMap<String, String>> = self
             .jvm
             .to_rust(data_java_instance)
             .map_err(|e| e.to_string())?;
         Ok(data)
     }
 
-    pub fn get_hbase_table_data_count(&self,tablename :&str) -> Result<i64, String> {
+    pub fn get_hbase_table_data_count(&self, tablename: &str) -> Result<i64, String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -305,7 +315,7 @@ impl HbaseOper {
         Ok(data)
     }
 
-    pub fn create_table(&self,settings :&str) -> Result<(), String> {
+    pub fn create_table(&self, settings: &str) -> Result<(), String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -323,8 +333,7 @@ impl HbaseOper {
             )
             .map_err(|e| e.to_string())?;
 
-         self
-            .jvm
+        self.jvm
             .invoke(
                 &self.hbase_tool,
                 "createTable",
@@ -338,8 +347,7 @@ impl HbaseOper {
         Ok(())
     }
 
-
-    pub fn create_namespace(&self,namespace :&str) -> Result<(), String> {
+    pub fn create_namespace(&self, namespace: &str) -> Result<(), String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -357,8 +365,7 @@ impl HbaseOper {
             )
             .map_err(|e| e.to_string())?;
 
-         self
-            .jvm
+        self.jvm
             .invoke(
                 &self.hbase_tool,
                 "createNamespace",
@@ -372,7 +379,7 @@ impl HbaseOper {
         Ok(())
     }
 
-    pub fn delete_table(&self,tablename :&str) -> Result<(), String> {
+    pub fn delete_table(&self, tablename: &str) -> Result<(), String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -390,8 +397,7 @@ impl HbaseOper {
             )
             .map_err(|e| e.to_string())?;
 
-         self
-            .jvm
+        self.jvm
             .invoke(
                 &self.hbase_tool,
                 "deleteTable",
@@ -405,7 +411,7 @@ impl HbaseOper {
         Ok(())
     }
 
-    pub fn delete_namespace(&self,namespace :&str) -> Result<(), String> {
+    pub fn delete_namespace(&self, namespace: &str) -> Result<(), String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -423,8 +429,7 @@ impl HbaseOper {
             )
             .map_err(|e| e.to_string())?;
 
-         self
-            .jvm
+        self.jvm
             .invoke(
                 &self.hbase_tool,
                 "deleteNamespace",
@@ -438,8 +443,7 @@ impl HbaseOper {
         Ok(())
     }
 
-
-    pub fn enable_table(&self,tablename :&str) -> Result<(), String> {
+    pub fn enable_table(&self, tablename: &str) -> Result<(), String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -457,8 +461,7 @@ impl HbaseOper {
             )
             .map_err(|e| e.to_string())?;
 
-         self
-            .jvm
+        self.jvm
             .invoke(
                 &self.hbase_tool,
                 "enableTable",
@@ -472,8 +475,7 @@ impl HbaseOper {
         Ok(())
     }
 
-
-    pub fn disable_table(&self,tablename :&str) -> Result<(), String> {
+    pub fn disable_table(&self, tablename: &str) -> Result<(), String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -491,8 +493,7 @@ impl HbaseOper {
             )
             .map_err(|e| e.to_string())?;
 
-         self
-            .jvm
+        self.jvm
             .invoke(
                 &self.hbase_tool,
                 "disableTable",
@@ -506,8 +507,10 @@ impl HbaseOper {
         Ok(())
     }
 
-
-    pub fn get_hbase_table_column_family_list(&self,tablename :&str) -> Result<Vec<String>, String> {
+    pub fn get_hbase_table_column_family_list(
+        &self,
+        tablename: &str,
+    ) -> Result<Vec<String>, String> {
         let conf_java_map = self
             .jvm
             .java_map(
@@ -547,13 +550,17 @@ impl HbaseOper {
 
 //hbase namespace 列表
 #[tauri::command]
-pub async fn get_hbase_namespace_list_command(id: i64) -> Result<Vec<HbaseNamespaceStatus>, String> {
+pub async fn get_hbase_namespace_list_command(
+    id: i64,
+) -> Result<Vec<HbaseNamespaceStatus>, String> {
     let oper = get_hbase_oper(id)?;
     let namespaces = oper.get_hbase_namespace_list()?;
     Ok(namespaces)
 }
 #[tauri::command]
-pub async fn get_hbase_namespace_metrics_list_command(id: i64) -> Result<Vec<HbaseNamespaceStatus>, String> {
+pub async fn get_hbase_namespace_metrics_list_command(
+    id: i64,
+) -> Result<Vec<HbaseNamespaceStatus>, String> {
     let oper = get_hbase_oper(id)?;
     let namespaces = oper.get_hbase_namespace_metrics_list()?;
     Ok(namespaces)
@@ -561,84 +568,91 @@ pub async fn get_hbase_namespace_metrics_list_command(id: i64) -> Result<Vec<Hba
 
 //hbase 指定namespace下 table 列表
 #[tauri::command]
-pub async fn get_hbase_table_list_command(id: i64, namespace :&str) -> Result<Vec<HbaseTableStatus>, String> {
+pub async fn get_hbase_table_list_command(
+    id: i64,
+    namespace: &str,
+) -> Result<Vec<HbaseTableStatus>, String> {
     let oper = get_hbase_oper(id)?;
     let tables = oper.get_hbase_table_list(namespace)?;
     Ok(tables)
 }
 //hbase 指定namespace下 table 列表（增加统计信息）
 #[tauri::command]
-pub async fn get_hbase_table_metrics_list_command(id: i64, namespace :&str) -> Result<Vec<HbaseTableStatus>, String> {
+pub async fn get_hbase_table_metrics_list_command(
+    id: i64,
+    namespace: &str,
+) -> Result<Vec<HbaseTableStatus>, String> {
     let oper = get_hbase_oper(id)?;
     let tables = oper.get_hbase_table_metrics_list(namespace)?;
     Ok(tables)
 }
 
-
-
 #[tauri::command]
-pub async fn get_hbase_table_data_list_command(id: i64, tablename :&str,page_num :i32, page_size:i32) -> Result<Vec<HashMap<String,String>>, String> {
+pub async fn get_hbase_table_data_list_command(
+    id: i64,
+    tablename: &str,
+    page_num: i32,
+    page_size: i32,
+) -> Result<Vec<HashMap<String, String>>, String> {
     let oper = get_hbase_oper(id)?;
-    let data = oper.get_hbase_table_data_list(tablename,page_num,page_size)?;
+    let data = oper.get_hbase_table_data_list(tablename, page_num, page_size)?;
     Ok(data)
 }
 
 #[tauri::command]
-pub async fn get_hbase_table_data_count_command(id: i64, tablename :&str) -> Result<i64, String> {
+pub async fn get_hbase_table_data_count_command(id: i64, tablename: &str) -> Result<i64, String> {
     let oper = get_hbase_oper(id)?;
     let data = oper.get_hbase_table_data_count(tablename)?;
     Ok(data)
 }
 
 #[tauri::command]
-pub async fn create_table_command(id: i64, settings :&str) -> Result<(), String> {
+pub async fn create_table_command(id: i64, settings: &str) -> Result<(), String> {
     let oper = get_hbase_oper(id)?;
     oper.create_table(settings)?;
     Ok(())
 }
 #[tauri::command]
-pub async fn create_namespace_command(id: i64, namespace :&str) -> Result<(), String> {
+pub async fn create_namespace_command(id: i64, namespace: &str) -> Result<(), String> {
     let oper = get_hbase_oper(id)?;
     oper.create_namespace(namespace)?;
     Ok(())
 }
 
 #[tauri::command]
-pub async fn delete_namespace_command(id: i64, namespace :&str) -> Result<(), String> {
+pub async fn delete_namespace_command(id: i64, namespace: &str) -> Result<(), String> {
     let oper = get_hbase_oper(id)?;
     oper.delete_namespace(namespace)?;
     Ok(())
 }
 
 #[tauri::command]
-pub async fn delete_table_command(id: i64, tablename :&str) -> Result<(), String> {
+pub async fn delete_table_command(id: i64, tablename: &str) -> Result<(), String> {
     let oper = get_hbase_oper(id)?;
     oper.delete_table(tablename)?;
     Ok(())
 }
 
-
 #[tauri::command]
-pub async fn enable_table_command(id: i64, tablename :&str) -> Result<(), String> {
+pub async fn enable_table_command(id: i64, tablename: &str) -> Result<(), String> {
     let oper = get_hbase_oper(id)?;
     oper.enable_table(tablename)?;
     Ok(())
 }
 
-
-
-
 #[tauri::command]
-pub async fn disable_table_command(id: i64, tablename :&str) -> Result<(), String> {
+pub async fn disable_table_command(id: i64, tablename: &str) -> Result<(), String> {
     let oper = get_hbase_oper(id)?;
     oper.disable_table(tablename)?;
     Ok(())
 }
 
 #[tauri::command]
-pub async fn get_hbase_table_column_family_list_command(id: i64, tablename :&str) -> Result<Vec<String>, String> {
+pub async fn get_hbase_table_column_family_list_command(
+    id: i64,
+    tablename: &str,
+) -> Result<Vec<String>, String> {
     let oper = get_hbase_oper(id)?;
-    let data=oper.get_hbase_table_column_family_list(tablename)?;
+    let data = oper.get_hbase_table_column_family_list(tablename)?;
     Ok(data)
 }
-

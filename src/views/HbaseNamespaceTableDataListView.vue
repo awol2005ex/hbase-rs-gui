@@ -11,22 +11,29 @@
                   :icon="HomeFilled"
                   circle
                   @click="backToHome"
-                  title="Back To Home" />
+                  title="Back To Home"
+                />
                 <el-button
                   type="primary"
                   :icon="Back"
                   circle
                   @click="backToLastPage"
                   title="Back To Last Page"
-              /></el-button-group>
+                />
+                <el-button
+                  type="primary"
+                  :icon="Connection"
+                  circle
+                  @click="createTableSql"
+                  title="Create Table SQL"
+                />
+              </el-button-group>
             </td>
 
             <td>
               {{ route.params.tablename }}
             </td>
-            <td>
-              Column Families: {{ columnFamilies.join(",") }}
-            </td>
+            <td>Column Families: {{ columnFamilies.join(",") }}</td>
           </tr>
         </table>
       </el-header>
@@ -56,7 +63,7 @@
                 >Prev Page</el-button
               >
             </td>
-            <td>Total:{{ total==-1 ?"?":total }}</td>
+            <td>Total:{{ total == -1 ? "?" : total }}</td>
 
             <td>
               <el-button type="primary" @click="GetTotalCount()"
@@ -68,15 +75,20 @@
       </el-footer>
     </el-container>
   </div>
+
+  <el-drawer v-model="show_sqlcreator" title="create table sql">
+    <el-tabs v-model="activeName" class="sql-tabs">
+      <el-tab-pane label="Spark SQL TEMPORARY VIEW " name="spark">
+      <pre style="white-space: pre-wrap;">{{spark_tv_sql}}</pre>
+      </el-tab-pane>
+    </el-tabs>
+  </el-drawer>
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElLoading } from "element-plus";
-import {
-  Back,
-  HomeFilled,
-} from "@element-plus/icons-vue";
+import { Back, HomeFilled, Connection } from "@element-plus/icons-vue";
 
 import {
   get_hbase_table_data_list,
@@ -91,8 +103,10 @@ const data = ref<Object[]>([]);
 
 const columnFamilies = ref<string[]>([]);
 
-get_hbase_table_column_family_list(parseInt(route.params.id as string),
-route.params.tablename as string).then((res) => {
+get_hbase_table_column_family_list(
+  parseInt(route.params.id as string),
+  route.params.tablename as string
+).then((res) => {
   columnFamilies.value = res;
 });
 const backToHome = () => {
@@ -139,7 +153,6 @@ const queryData = async () => {
   loadingInstance1.close();
 };
 
-
 const NextPage = async () => {
   currentPage.value = currentPage.value + 1;
   await queryData();
@@ -160,10 +173,46 @@ const GetTotalCount = async () => {
   } catch (error: any) {
     ElMessage({
       showClose: true,
-     message: error.toString(),
-    })
+      message: error.toString(),
+    });
   }
   loadingInstance1.close();
-}
+};
+
+const show_sqlcreator = ref(false);
+
+const spark_tv_sql = ref("");
+
+const get_spark_tv_sql = async () => {
+  let columns_str = "";
+  if (columns.value.length > 0) {
+    columns_str =
+      "," +
+      columns.value
+        .map((c) => {
+          return `${c.split(":")[1]} ${c} String`;
+        })
+        .join(",");
+  }
+  let sql = `CREATE OR REPLACE TEMPORARY VIEW spark_tv_${(
+    route.params.tablename as string
+  ).replace(":", "_")} 
+      	USING org.apache.hadoop.hbase.spark
+OPTIONS(
+  "hbase.table"="${route.params.tablename as string}",
+  "hbase.columns.mapping"="rowKey String :key${columns_str}",
+  "hbase.spark.use.hbasecontext"="false"
+)
+  `;
+  console.log(sql)
+  spark_tv_sql.value = sql;
+};
+
+const createTableSql = async () => {
+  show_sqlcreator.value = true;
+  await get_spark_tv_sql();
+};
+
+const activeName = ref("spark");
 </script>
 <style scoped></style>

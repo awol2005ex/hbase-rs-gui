@@ -76,13 +76,16 @@
     </el-container>
   </div>
 
-  <el-drawer v-model="show_sqlcreator" title="create table sql">
+  <el-drawer v-model="show_sqlcreator" title="create table sql" size="70%"> 
     <el-tabs v-model="activeName" class="sql-tabs">
       <el-tab-pane label="Spark SQL TEMPORARY VIEW " name="spark">
-      <pre style="white-space: pre-wrap;">{{spark_tv_sql}}</pre>
+        <pre style="white-space: pre-wrap;word-wrap: break-word;overflow: auto;">{{ spark_tv_sql }}</pre>
       </el-tab-pane>
       <el-tab-pane label="FLINK TABLE SQL " name="flink">
-      <pre style="white-space: pre-wrap;">{{flink_sql}}</pre>
+        <pre style="white-space: pre-wrap;word-wrap: break-word;overflow: auto;">{{ flink_sql }}</pre>
+      </el-tab-pane>
+      <el-tab-pane label="HIVE TABLE SQL " name="hive">
+        <pre style="white-space: pre-wrap;word-wrap: break-word;overflow: auto;">{{ hive_sql }}</pre>
       </el-tab-pane>
     </el-tabs>
   </el-drawer>
@@ -186,6 +189,7 @@ const show_sqlcreator = ref(false);
 
 const spark_tv_sql = ref("");
 const flink_sql =ref("")
+const hive_sql=ref("")
 
 const get_spark_tv_sql = async () => {
   let columns_str = "";
@@ -200,7 +204,7 @@ const get_spark_tv_sql = async () => {
   }
   let sql = `CREATE OR REPLACE TEMPORARY VIEW spark_tv_${(
     route.params.tablename as string
-  ).replace(":", "_")} 
+  ).replace(":", "_")}
       	USING org.apache.hadoop.hbase.spark
 OPTIONS(
   "hbase.table"="${route.params.tablename as string}",
@@ -243,10 +247,51 @@ ${cf_str}
   flink_sql.value = sql;
 };
 
+
+const create_hive_sql = async () => {
+  let columns_str2= "";
+  if (columns.value.length > 0) {
+    columns_str2 =
+      "," +
+      columns.value
+        .join(",");
+  }
+
+  let columns_str1="";
+  if (columns.value.length > 0) {
+    columns_str1 =
+      columns.value .map((c) => {
+          return `,${c.split(":")[1]} string`;
+        })
+        .join("\n");
+  }
+
+   let sql =`CREATE EXTERNAL TABLE  ${(route.params.tablename as string).replace(":", ".")} (
+  rowkey string COMMENT 'rowkey'
+${columns_str1}
+  )
+ROW FORMAT SERDE
+  'org.apache.hadoop.hive.hbase.HBaseSerDe'
+STORED BY
+  'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES (
+  'hbase.columns.mapping'=':key${columns_str2}')
+TBLPROPERTIES (
+  'TRANSLATED_TO_EXTERNAL'='TRUE',
+  'bucketing_version'='2',
+  'external.table.purge'='FALSE',
+  'hbase.table.name'='${(route.params.tablename as string)}')
+   `;
+
+   console.log(sql)
+   hive_sql.value = sql;
+}
+
 const createTableSql = async () => {
   show_sqlcreator.value = true;
   await get_spark_tv_sql();
   await create_flink_table_sql();
+  await create_hive_sql();
 };
 
 const activeName = ref("spark");

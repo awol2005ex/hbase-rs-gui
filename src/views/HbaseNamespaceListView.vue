@@ -46,6 +46,22 @@
                 inactive-text="don't show table metrics"
               />
             </td>
+
+            <td>
+              <el-input
+                v-model="search_words"
+                style="
+                  width: 240px;
+                  float: left;
+                  margin-left: 10px;
+                  margin-top: 5px;
+                "
+                placeholder="Search Namespaces"
+                :prefix-icon="Search"
+                @change="on_search_words_change"
+                clearable
+              />
+            </td>
           </tr>
         </table>
       </el-header>
@@ -124,7 +140,7 @@
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElLoading, ElMessageBox } from "element-plus";
-import { Back, HomeFilled, Delete, Plus } from "@element-plus/icons-vue";
+import { Back, HomeFilled, Delete, Plus, Search } from "@element-plus/icons-vue";
 import {
   Namespace,
   get_hbase_namespace_list,
@@ -158,7 +174,13 @@ const refresh = () => {
   if (show_table_metrics.value) {
     get_hbase_namespace_metrics_list(parseInt(route.params.id as string))
       .then((res) => {
-        data.value = res;
+        if(search_words.value == ""){
+           data.value = res;
+        } else {
+          data.value = res.filter((item) => {
+            return item.name?.includes(search_words.value);
+          });
+        }
         loadingInstance1.close();
       })
       .catch((error) => {
@@ -172,7 +194,13 @@ const refresh = () => {
   } else {
     get_hbase_namespace_list(parseInt(route.params.id as string))
       .then((res) => {
-        data.value = res;
+        if(search_words.value == ""){
+           data.value = res;
+        } else {
+          data.value = res.filter((item) => {
+            return item.name?.includes(search_words.value);
+          });
+        }
         loadingInstance1.close();
       })
       .catch((error) => {
@@ -288,6 +316,12 @@ const DeleteNamespaces = async () => {
   } else {
     return;
   }
+};
+
+
+const search_words= ref("")
+const on_search_words_change = () => {
+  refresh();
 };
 </script>
 <style scoped></style>

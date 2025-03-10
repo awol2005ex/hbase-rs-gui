@@ -81,6 +81,9 @@
       <el-tab-pane label="Spark SQL TEMPORARY VIEW " name="spark">
       <pre style="white-space: pre-wrap;">{{spark_tv_sql}}</pre>
       </el-tab-pane>
+      <el-tab-pane label="FLINK TABLE SQL " name="flink">
+      <pre style="white-space: pre-wrap;">{{flink_sql}}</pre>
+      </el-tab-pane>
     </el-tabs>
   </el-drawer>
 </template>
@@ -182,6 +185,7 @@ const GetTotalCount = async () => {
 const show_sqlcreator = ref(false);
 
 const spark_tv_sql = ref("");
+const flink_sql =ref("")
 
 const get_spark_tv_sql = async () => {
   let columns_str = "";
@@ -204,13 +208,45 @@ OPTIONS(
   "hbase.spark.use.hbasecontext"="false"
 )
   `;
-  console.log(sql)
   spark_tv_sql.value = sql;
+};
+
+const create_flink_table_sql = async () => {
+  let cf_str= "";
+  if (columnFamilies.value.length > 0) {
+    cf_str = columnFamilies.value.map((cf) => {
+      let columns_str =columns.value.filter( (c) =>{
+        return c.startsWith(cf+":");
+      })
+        .map((c) => {
+          return `${c.split(":")[1]} ${c} String`;
+        }).join(",");
+      return `${cf} ROW<${columns_str}>,`;
+    }).join(",\n");
+  }
+
+  let sql =`
+  CREATE TABLE if not exists flink_table_${(route.params.tablename as string).replace(":", "_")} (
+ rowkey  STRING,
+${cf_str}
+ PRIMARY KEY (rowkey ) NOT ENFORCED
+) WITH (
+ 'connector' = 'hbase-2.2',
+ 'table-name' = '${(route.params.tablename as string)}',
+ 'zookeeper.quorum' = 'xxx:2181',
+ 'hadoop.security.authentication'='kerberos',
+ 'hbase.security.authentication'='kerberos',
+ 'hbase.master.kerberos.principal'='hive/_HOST@XXX.COM',
+ 'hbase.regionserver.kerberos.principal'='hive/_HOST@XXX.COM'
+)
+  `
+  flink_sql.value = sql;
 };
 
 const createTableSql = async () => {
   show_sqlcreator.value = true;
   await get_spark_tv_sql();
+  await create_flink_table_sql();
 };
 
 const activeName = ref("spark");

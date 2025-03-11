@@ -37,7 +37,12 @@
                   :icon="Close"
                   circle
                   @click="DisableTables"
-                  title="Disable Tables"
+                  title="Disable Tables" /><el-button
+                  type="primary"
+                  :icon="Download"
+                  circle
+                  @click="ExportCreateExternalTableSQLtoExcel"
+                  title="Export Create External Table SQL to Excel"
               /></el-button-group>
             </td>
 
@@ -160,6 +165,7 @@ import {
   Close,
   Check,
   Search,
+  Download,
 } from "@element-plus/icons-vue";
 import {
   HbaseTableStatus,
@@ -170,6 +176,10 @@ import {
   disable_table,
   get_hbase_table_metrics_list,
 } from "../api/hbase_api.ts";
+
+import { export_table_sql_to_excel } from "../utils/sql";
+import { getHbaseConfig } from "../api/hbase_config.ts";
+
 const router = useRouter();
 const route = useRoute();
 
@@ -200,8 +210,8 @@ const refresh = () => {
       route.params.namespace as string
     )
       .then((res) => {
-        if(search_words.value == ""){
-           data.value = res;
+        if (search_words.value == "") {
+          data.value = res;
         } else {
           data.value = res.filter((item) => {
             return item.name?.includes(search_words.value);
@@ -223,8 +233,8 @@ const refresh = () => {
       route.params.namespace as string
     )
       .then((res) => {
-        if(search_words.value == ""){
-           data.value = res;
+        if (search_words.value == "") {
+          data.value = res;
         } else {
           data.value = res.filter((item) => {
             return item.name?.includes(search_words.value);
@@ -459,9 +469,29 @@ const DisableTables = async () => {
   }
 };
 
-const search_words= ref("")
+const search_words = ref("");
 const on_search_words_change = () => {
   refresh();
+};
+
+const ExportCreateExternalTableSQLtoExcel = async () => {
+  const loadingInstance1 = ElLoading.service({ fullscreen: true });
+  try {
+    const config = await getHbaseConfig(parseInt(route.params.id as string));
+    await export_table_sql_to_excel(
+      parseInt(route.params.id as string),
+      multipleSelection.value,
+      new Map(Object.entries(JSON.parse(config.hbase_config || "{}")))
+    );
+  } catch (error: any) {
+    ElMessage({
+      showClose: true,
+      message: error.toString(),
+      type: "error",
+    });
+  }
+
+  loadingInstance1.close();
 };
 </script>
 <style scoped></style>

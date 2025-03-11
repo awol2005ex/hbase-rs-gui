@@ -21,7 +21,8 @@
     "element-plus": "^2.9.0",
     "vue": "^3.3.4",
     "vue-codemirror": "^6.1.1",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "write-excel-file": "^2.3.2"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

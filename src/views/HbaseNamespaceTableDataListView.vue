@@ -117,6 +117,8 @@ import {
   create_hive_sql_impl,
 } from "../utils/sql.ts";
 
+import {getHbaseConfig} from "../api/hbase_config.ts";
+
 const router = useRouter();
 const route = useRoute();
 
@@ -124,12 +126,19 @@ const data = ref<Object[]>([]);
 
 const columnFamilies = ref<string[]>([]);
 
+const hbaseConfig =ref<Map<string,string>>(new Map<string,string>());
+
 get_hbase_table_column_family_list(
   parseInt(route.params.id as string),
   route.params.tablename as string
 ).then((res) => {
   columnFamilies.value = res;
 });
+
+getHbaseConfig(parseInt(route.params.id as string)).then((res) => {
+  hbaseConfig.value =new Map(Object.entries(JSON.parse(res.hbase_config||"{}")))
+});
+
 const backToHome = () => {
   router.push("/");
 };
@@ -217,7 +226,8 @@ const create_flink_table_sql = async () => {
   flink_sql.value = await create_flink_table_sql_impl(
     route.params.tablename as string,
     columns.value,
-    columnFamilies.value
+    columnFamilies.value,
+    hbaseConfig.value,
   );
 };
 

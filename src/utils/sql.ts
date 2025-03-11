@@ -25,7 +25,8 @@ const get_spark_tv_sql_impl = async (tablename: string, columns: string[]) => {
 const create_flink_table_sql_impl = async (
   tablename: string,
   columns: string[],
-  columnFamilies: string[]
+  columnFamilies: string[],
+  hbaseConfig :Map<string,string>,
 ) => {
   let cf_str = "";
   if (columnFamilies.length > 0) {
@@ -44,6 +45,21 @@ const create_flink_table_sql_impl = async (
       .join(",\n");
   }
 
+  let prop_str="";
+  if(hbaseConfig.has("hbase.zookeeper.quorum") &&  hbaseConfig.has("hbase.zookeeper.property.clientPort")){
+
+    const zk=hbaseConfig.get("hbase.zookeeper.quorum")?.split(",").map(q=>q+":"+hbaseConfig.get("hbase.zookeeper.property.clientPort")).join(",");
+      prop_str=prop_str+ `\n,'zookeeper.quorum' = '${zk}'`
+
+      
+  }
+  if((hbaseConfig.get("hadoop.security.authentication")||"")=="kerberos") {
+    prop_str=prop_str+ `\n,'hadoop.security.authentication' = 'kerberos'`
+    prop_str=prop_str+ `\n,'hbase.security.authentication' = 'kerberos'`
+    prop_str=prop_str+ `\n,'hbase.master.kerberos.principal' = '${ hbaseConfig.get("hadoop.security.kerberos.principal")?.replace("@","/_HOST@") }'`
+    prop_str=prop_str+ `\n,'hbase.regionserver.kerberos.principal' = '${ hbaseConfig.get("hadoop.security.kerberos.principal")?.replace("@","/_HOST@") }'`
+  }
+
   let sql = `
     CREATE TABLE if not exists flink_table_${(tablename as string).replace(
       ":",
@@ -54,12 +70,8 @@ const create_flink_table_sql_impl = async (
    PRIMARY KEY (rowkey ) NOT ENFORCED
   ) WITH (
    'connector' = 'hbase-2.2',
-   'table-name' = '${tablename as string}',
-   'zookeeper.quorum' = 'xxx:2181',
-   'hadoop.security.authentication'='kerberos',
-   'hbase.security.authentication'='kerberos',
-   'hbase.master.kerberos.principal'='hive/_HOST@XXX.COM',
-   'hbase.regionserver.kerberos.principal'='hive/_HOST@XXX.COM'
+   'table-name' = '${tablename as string}'
+   ${prop_str}
   )
     `;
   return sql;

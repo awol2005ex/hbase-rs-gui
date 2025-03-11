@@ -8,14 +8,20 @@ mod db;
 pub fn run() {
     let current_dir = std::env::current_dir().map_err(|e| e.to_string()).unwrap();
     tauri::Builder::default()
-        .plugin(tauri_plugin_log::Builder::new().target(tauri_plugin_log::Target::new(
-            tauri_plugin_log::TargetKind::Webview,
-          )).target(tauri_plugin_log::Target::new(
-            tauri_plugin_log::TargetKind::Folder {
-              path: current_dir.join("logs"),
-              file_name: None,
-            },
-          )).build())
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .timezone_strategy(tauri_plugin_log::TimezoneStrategy::UseLocal)
+                .target(tauri_plugin_log::Target::new(
+                    tauri_plugin_log::TargetKind::Webview,
+                ))
+                .target(tauri_plugin_log::Target::new(
+                    tauri_plugin_log::TargetKind::Folder {
+                        path: current_dir.join("logs"),
+                        file_name: None,
+                    },
+                ))
+                .build(),
+        )
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![

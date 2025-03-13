@@ -33,6 +33,13 @@
                   @click="DeleteNamespaces"
                   title="Delete Namespaces"
                 />
+                <el-button
+                  type="primary"
+                  :icon="List"
+                  circle
+                  @click="ExportNamespacesToExcel"
+                  title="Export List To Excel"
+                />
               </el-button-group>
             </td>
             <td>
@@ -143,7 +150,7 @@
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElLoading, ElMessageBox } from "element-plus";
-import { Back, HomeFilled, Delete, Plus, Search } from "@element-plus/icons-vue";
+import { Back, HomeFilled, Delete, Plus, Search ,List} from "@element-plus/icons-vue";
 import {
   Namespace,
   get_hbase_namespace_list,
@@ -151,6 +158,9 @@ import {
   create_namespace,
   delete_namespace,
 } from "../api/hbase_api.ts";
+import writeXlsxFile from "write-excel-file";
+
+
 const router = useRouter();
 const route = useRoute();
 
@@ -345,5 +355,41 @@ const search_words= ref("")
 const on_search_words_change = () => {
   refresh();
 };
+
+const ExportNamespacesToExcel = async () => {
+  const loadingInstance1 = ElLoading.service({ fullscreen: true });
+  try {
+    let schema = [
+      {
+        column: "Namespace",
+        type: String,
+        value: (s: { [x: string]: any; }) => s["name"],
+      },
+    ];
+    if(show_table_metrics.value){
+      schema.push({
+        column: "Disk Size",
+        type: String,
+        value: (s: { [x: string]: any; }) => formatFileSize(s["disksize"]),
+      });
+      schema.push({
+        column: "Mem Store Size",
+        type: String,
+        value: (s: { [x: string]: any; }) => formatFileSize(s["memstoresize"]),
+      });
+    }
+    await writeXlsxFile( data.value, {
+      schema,
+      fileName: "namespaces.xlsx",
+    });
+  } catch (error: any) {
+    ElMessage({
+      showClose: true,
+      message: error.toString(),
+      type:"error",
+    })
+  }
+  loadingInstance1.close();
+}
 </script>
 <style scoped></style>

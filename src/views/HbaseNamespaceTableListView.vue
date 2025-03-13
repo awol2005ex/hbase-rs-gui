@@ -39,11 +39,17 @@
                   @click="DisableTables"
                   title="Disable Tables" /><el-button
                   type="primary"
-                  :icon="Download"
+                  :icon="Collection"
                   circle
                   @click="ExportCreateExternalTableSQLtoExcel"
                   title="Export Create External Table SQL to Excel"
-              /></el-button-group>
+              /><el-button
+                  type="primary"
+                  :icon="List"
+                  circle
+                  @click="ExportTablesToExcel"
+                  title="Export Table List To Excel"
+                /></el-button-group>
             </td>
 
             <td>
@@ -174,7 +180,8 @@ import {
   Close,
   Check,
   Search,
-  Download,
+  Collection,
+  List,
 } from "@element-plus/icons-vue";
 import {
   HbaseTableStatus,
@@ -188,6 +195,7 @@ import {
 
 import { export_table_sql_to_excel } from "../utils/sql";
 import { getHbaseConfig } from "../api/hbase_config.ts";
+import writeXlsxFile from "write-excel-file";
 
 const router = useRouter();
 const route = useRoute();
@@ -521,5 +529,48 @@ const ExportCreateExternalTableSQLtoExcel = async () => {
 
   loadingInstance1.close();
 };
+
+
+const  ExportTablesToExcel = async () => {
+  const loadingInstance1 = ElLoading.service({ fullscreen: true });
+  try {
+    let schema = [
+      {
+        column: "Table",
+        type: String,
+        value: (s: { [x: string]: any; }) => s["name"],
+      },
+      {
+        column: "Enabled",
+        type: String,
+        value: (s: { [x: string]: any; }) => s["enabled"].toString(),
+      },
+    ];
+    if(show_table_metrics.value){
+      schema.push({
+        column: "Disk Size",
+        type: String,
+        value: (s: { [x: string]: any; }) => formatFileSize(s["disksize"]),
+      });
+      schema.push({
+        column: "Mem Store Size",
+        type: String,
+        value: (s: { [x: string]: any; }) => formatFileSize(s["memstoresize"]),
+      });
+    }
+    await writeXlsxFile( data.value, {
+      schema,
+      fileName: "tables.xlsx",
+    });
+  } catch (error: any) {
+    ElMessage({
+      showClose: true,
+      message: error.toString(),
+      type:"error",
+    })
+  }
+  loadingInstance1.close();
+
+}
 </script>
 <style scoped></style>

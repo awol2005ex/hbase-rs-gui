@@ -22,7 +22,7 @@
                 />
                 <el-button
                   type="primary"
-                  :icon="Connection"
+                  :icon="Collection"
                   circle
                   @click="createTableSql"
                   title="Create Table SQL"
@@ -103,7 +103,7 @@
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElLoading } from "element-plus";
-import { Back, HomeFilled, Connection } from "@element-plus/icons-vue";
+import { Back, HomeFilled, Collection } from "@element-plus/icons-vue";
 
 import {
   get_hbase_table_data_list,

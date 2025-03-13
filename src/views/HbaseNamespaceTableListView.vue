@@ -81,9 +81,15 @@
           :data="data"
           style="width: 100%"
           @selection-change="handleSelectionChange"
+          @sort-change="sortChange"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="name" label="Table" width="300">
+          <el-table-column
+            prop="name"
+            label="Table"
+            width="300"
+            sortable="custom"
+          >
             <template #default="scope">
               <el-link
                 :underline="false"
@@ -96,6 +102,7 @@
             prop="enabled"
             label="Enabled"
             width="300"
+            sortable="custom"
           ></el-table-column>
 
           <el-table-column
@@ -103,6 +110,7 @@
             prop="disksize"
             label="DiskSize"
             width="300"
+            sortable="custom"
           >
             <template #default="scope">
               {{ formatFileSize(scope.row.disksize) }}
@@ -113,6 +121,7 @@
             prop="memstoresize"
             label="MemstoreSize"
             width="300"
+            sortable="custom"
             ><template #default="scope">
               {{ formatFileSize(scope.row.memstoresize) }}
             </template></el-table-column
@@ -200,7 +209,16 @@ const formatFileSize = (size: number) => {
     return size + " MB";
   }
 };
+const sortProp = ref("");
+const sortOrder = ref("");
+//排序
+const sortChange = (row: { column: any; prop: any; order: any }) => {
+  const { prop, order } = row;
 
+  sortProp.value = prop;
+  sortOrder.value = order;
+  refresh();
+};
 const refresh = () => {
   const loadingInstance1 = ElLoading.service({ fullscreen: true });
 
@@ -217,6 +235,16 @@ const refresh = () => {
             return item.name?.includes(search_words.value);
           });
         }
+        data.value = data.value //排序
+          .sort((a: HbaseTableStatus, b: HbaseTableStatus) => {
+            const prop = sortProp.value as keyof HbaseTableStatus;
+            const aVal = a[prop] ?? 0; // 处理undefined情况
+            const bVal = b[prop] ?? 0;
+
+            if (aVal < bVal) return sortOrder.value === "descending" ? -1 : 1;
+            if (aVal > bVal) return sortOrder.value === "descending" ? 1 : -1;
+            return 0;
+          });
         loadingInstance1.close();
       })
       .catch((error) => {

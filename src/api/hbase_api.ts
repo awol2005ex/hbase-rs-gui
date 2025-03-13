@@ -8,7 +8,7 @@ export class Namespace {
     disksize? :number
 
     memstoresize? :number
-
+    [key: string]: string | number | Boolean | undefined;
     constructor(name :string) { 
       this.name = name;
     }
@@ -35,6 +35,8 @@ export class HbaseTableStatus {
   disksize? :number
 
   memstoresize? :number
+
+  [key: string]: string | number | Boolean | undefined;
 
   constructor(name :string,namespace :string ,enabled: boolean) { 
     this.name = name;

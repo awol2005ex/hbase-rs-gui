@@ -11,7 +11,7 @@ const get_spark_tv_sql_impl = async (tablename: string, columns: string[]) => {
       "," +
       columns
         .map((c) => {
-          return `${c.split(":")[1]} ${c} String`;
+          return `${c.split(":")[1]} String ${c} `;
         })
         .join(",");
   }

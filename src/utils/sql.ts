@@ -22,7 +22,8 @@ const get_spark_tv_sql_impl = async (tablename: string, columns: string[]) => {
   OPTIONS(
     "hbase.table"="${tablename as string}",
     "hbase.columns.mapping"="rowKey String :key${columns_str}",
-    "hbase.spark.use.hbasecontext"="false"
+    "hbase.spark.use.hbasecontext"="false",
+    "hbase.spark.pushdown.columnfilter"="false"
   )
     `;
   return sql;
